@@ -1,0 +1,118 @@
+@import url(//fonts.googleapis.com/earlyaccess/notosanstc.css);
+*, *:before, *:after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+$fontF: 'Noto Sans TC', sans-serif, '微軟正黑體', '黑體' , 'Arial';
+$colorWhite: #f1f1f1;
+
+@mixin size($w, $h: $w) {
+  width: $w;
+  height: $h;
+}
+html,body {
+  background-color: #3e3a39;
+}
+.postit {
+  @include size(240px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: calc(240px / 4 - 15px);
+  letter-spacing: 10px;
+  font-weight: 500;
+  box-shadow: 15px 10px 40px rgba(black, .4);
+  // background-color: $colorYellow;
+  position: absolute;
+  transition: background-color .3s;
+  cursor: pointer;
+  .text {
+    font-family: $fontF;
+    color: #44403f;
+    pointer-events: none;
+    text-align: center;
+  }
+  .colorList {
+    position: absolute;
+    bottom: -50px;
+    display: flex;
+    opacity: 0;
+    transition: .5s;
+    .colorBlock {
+      @include size(30px);
+      display: inline-block;
+      margin-right: 10px;
+    }
+  }
+  &:hover {
+    .colorList {
+      opacity: 1;
+    }
+  }
+  i {
+    color: white;
+    font-size: 28px;
+    transition: 0.5s;
+    opacity: .8;
+  }
+}
+
+.dataList {
+  overflow-y: scroll;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 20%;
+  height: 60%;
+  border: 1px solid $colorWhite;
+  padding: 10px;
+  min-width: 200px;
+  max-width: 300px;
+  button {
+    display: block;
+    width: 100%;
+    padding: 10px 5px;
+    margin: auto;
+    font-size: 1rem;
+    font-family: $fontF;
+    font-weight: 500;
+    background-color: transparent;
+    color: $colorWhite;
+    transition: .5s;
+    cursor: pointer;
+    margin-bottom: 10px;
+    &:focus {
+      outline: none;
+    }
+    &:hover {
+      background-color: $colorWhite;
+      color: #313233;
+    }
+  }
+  ul {
+    list-style: none;
+    li {
+      color: $colorWhite;
+      padding: 5px 10px;
+      border-bottom: 1px solid;
+      font-family: $fontF;
+      h3 {
+        font-size: 1rem;
+        font-weight: 300;
+        margin-bottom: 5px;
+      }
+      textarea {
+        width: 100%;
+      }
+    }
+  }
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: .5s;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+  transform: scale(0)
+}

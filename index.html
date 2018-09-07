@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Postit Wall</title>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+  <link rel="stylesheet" href="/style/style.css">
+</head>
+<body>
+  <div id="app">
+    <transition-group name="fade">
+      <div class="postit" v-for="(p, pid) in postits" :style="postitCss(p)" :key="pid"
+        @mousedown="selectId($event,pid)" @touchstart="selectId($event,pid)">
+        <div class="text" v-html="newLinetoBr(p.text)"></div>
+        <div class="colorList">
+          <div class="colorBlock" v-for="color in colorList" 
+            :style="{backgroundColor: color.color}" @click="p.color = color.color">
+          </div>
+          <i class="fas fa-pencil-alt" @click="editPostit(p)"></i>
+          <i class="far fa-trash-alt" @click="removePostit(pid)"></i>
+        </div>
+      </div>
+    </transition-group>
+    <div class="dataList">
+      <button @click="addPostit">Add postit +</button>
+      <ul>
+        <li v-for="(p, pid) in postits">
+          <h3>{{p.text}}</h3>
+          <textarea v-model="p.text"></textarea>
+        </li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+<script>
+  var vm = new Vue({
+    el: '#app',
+    data() {
+      return {
+        postits: [
+          {
+            text: '文字文字',
+            color: '#ffeb67',
+            pos: {x: 20, y: 20}
+          }
+        ],
+        colorList: [
+          {
+            name: 'yellow',
+            color: '#ffeb67'
+          },
+          {
+            name: 'red',
+            color: '#ef898c'
+          },
+          {
+            name: 'blue',
+            color: '#a5d8d6'
+          },
+          {
+            name: 'green',
+            color: '#cbe196'
+          }
+        ],
+        nowId: -1,
+        mousePos: {x: 0, y: 0},
+        startPos: {x: 0, y: 0}
+      }
+    },
+    methods: {
+      postitCss(p) {
+        return {
+          left: p.pos.x + 'px',
+          top: p.pos.y + 'px',
+          fontSize: ((240-10) / p.text.length) - 10 + 'px',
+          backgroundColor: this.colorList.find((item) => {
+            return item.color == p.color
+          }).color
+        }
+      },
+      newLinetoBr(text) {
+        return text.replace(new RegExp('\n'), '<br>');
+      },
+      selectId(e,id) {
+        if(e.srcElement.classList.contains('postit')) {
+          this.nowId = id;
+          this.startPos = {
+            x: e.offsetX,
+            y: e.offsetY
+          }
+        } else {
+          this.nowId = -1;
+        }
+      },
+      addPostit() {
+        let ran = Math.floor(Math.random()*4);
+        let ranColor = this.colorList[ran].color
+        this.postits.push({
+          text: '文字文字',
+          color: ranColor,
+          pos: {x: 350+Math.random()*200, y: 200+Math.random()*200}
+        })
+      },
+      editPostit(p) {
+        let text = prompt("輸入新內容：", p.text);
+        p.text = text;
+      },
+      removePostit(id) {
+        this.postits.splice(id, 1);
+      }
+    },
+    watch: {
+      mousePos() {
+        if(this.nowId != -1) {
+          let nowPostit = this.postits[this.nowId];
+          nowPostit.pos.x = this.mousePos.x - this.startPos.x;
+          nowPostit.pos.y = this.mousePos.y - this.startPos.y;
+        }
+      }
+    }
+  })
+
+  window.onmousemove = (e) => {
+    if(vm.nowId != -1) {
+      vm.mousePos = {x: e.pageX, y: e.pageY}
+    }
+  }
+  window.ontouchmove = (e) => {
+    if(vm.nowId != -1) {
+      vm.mousePos = {x: e.pageX, y: e.pageY}
+    }
+  }
+
+  window.onmouseup = () => {
+    vm.nowId = -1;
+  }
+  window.ontouchend = () => {
+    vm.nowId = -1;
+  }
+</script>
