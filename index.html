@@ -16,9 +16,9 @@
         <div class="text" v-html="newLinetoBr(p.text)"></div>
         <div class="colorList">
           <div class="colorBlock" v-for="color in colorList" 
-            :style="{backgroundColor: color.color}" @click="p.color = color.color">
+            :style="{backgroundColor: color.color}" @click="setColor(pid, color.color)">
           </div>
-          <i class="fas fa-pencil-alt" @click="editPostit(p)"></i>
+          <i class="fas fa-pencil-alt" @click="editPostit(p, pid)"></i>
           <i class="far fa-trash-alt" @click="removePostit(pid)"></i>
         </div>
       </div>
@@ -28,7 +28,7 @@
       <ul>
         <li v-for="(p, pid) in postits">
           <h3>{{p.text}}</h3>
-          <textarea v-model="p.text"></textarea>
+          <textarea v-model="p.text" @change="updateText(pid)"></textarea>
         </li>
       </ul>
     </div>
@@ -36,19 +36,15 @@
 </body>
 </html>
 
-<script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/5.4.2/firebase.js"></script>
+
 <script>
   var vm = new Vue({
     el: '#app',
     data() {
       return {
-        postits: [
-          {
-            text: '文字文字',
-            color: '#ffeb67',
-            pos: {x: 20, y: 20}
-          }
-        ],
+        postits: [],
         colorList: [
           {
             name: 'yellow',
@@ -100,18 +96,25 @@
       addPostit() {
         let ran = Math.floor(Math.random()*4);
         let ranColor = this.colorList[ran].color
-        this.postits.push({
+        postitRef.push({
           text: '文字文字',
           color: ranColor,
           pos: {x: 350+Math.random()*200, y: 200+Math.random()*200}
         })
       },
-      editPostit(p) {
+      setColor(id, color) {
+        this.postits[id].color = color;
+        postitRef.child(id).set(this.postits[id]);
+      },
+      editPostit(p, id) {
         let text = prompt("輸入新內容：", p.text);
-        p.text = text;
+        postitRef.child(id).child('text').set(text);
+      },
+      updateText(id) {
+        postitRef.child(id).set(this.postits[id]);
       },
       removePostit(id) {
-        this.postits.splice(id, 1);
+        postitRef.child(id).remove();
       }
     },
     watch: {
@@ -120,6 +123,8 @@
           let nowPostit = this.postits[this.nowId];
           nowPostit.pos.x = this.mousePos.x - this.startPos.x;
           nowPostit.pos.y = this.mousePos.y - this.startPos.y;
+          //同步firebase
+          postitRef.child(this.nowId).set(nowPostit);
         }
       }
     }
@@ -142,4 +147,19 @@
   window.ontouchend = () => {
     vm.nowId = -1;
   }
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyCE6O3NdbIP5sVSA16l3qSFVTgkhZY_u20",
+    authDomain: "postit-wall.firebaseapp.com",
+    databaseURL: "https://postit-wall.firebaseio.com",
+    projectId: "postit-wall",
+    storageBucket: "postit-wall.appspot.com",
+    messagingSenderId: "511434022639"
+  };
+  firebase.initializeApp(config);
+
+  var postitRef = firebase.database().ref('/postit/');
+  postitRef.on('value', (snapshot) => {
+    vm.postits = snapshot.val();
+  })
 </script>
