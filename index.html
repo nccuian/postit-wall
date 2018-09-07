@@ -70,10 +70,12 @@
     },
     methods: {
       postitCss(p) {
+        let fontSize = ((240-10)/(1+Math.max((p.text).split("\n").map(t=>t.length)))-10);
         return {
           left: p.pos.x + 'px',
           top: p.pos.y + 'px',
-          fontSize: ((240-10) / p.text.length) - 10 + 'px',
+          fontSize: fontSize >=1? fontSize + 'px': 1 + 'px',
+          // fontSize: ((240-10) / p.text.length) - 10 + 'px',
           backgroundColor: this.colorList.find((item) => {
             return item.color == p.color
           }).color
